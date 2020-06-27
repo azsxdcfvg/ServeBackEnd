@@ -160,9 +160,17 @@ class logindbHandler:
     def __init__(self, cursor):
         self.tbname = loginTableName
         self.cursor = cursor
-        if self.isExist("admin", "admin", 0) == -1:
-            print("write")
-            self.writeData("admin", "admin", 0)
+        if self.isExist("admin", "admin", 1) == -1:
+            print("write admin")
+            self.writeData("admin", "admin", 1)
+
+        if self.isExist("bar", "bar", 2) == -1:
+            print("write bar")
+            self.writeData("bar", "bar", 2)
+
+        if self.isExist("manager", "manager", 3) == -1:
+            print("write manager")
+            self.writeData("manager", "manager", 3)
 
     def hashencode(self, password: str) -> str:
         return str(base64.b64encode(bytes(password, encoding="utf-8")))

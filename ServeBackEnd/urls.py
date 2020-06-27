@@ -1,12 +1,16 @@
 from django.urls import path
 from django.http import HttpResponse
+from django.utils.decorators import method_decorator
+
 from .core import Aircon
+from django.views.decorators.csrf import csrf_exempt
 
 import json
 from .core.Aircon import Request
 
 AirCondition = Aircon.Aircon()
 DataBase = AirCondition.handle.logindbhandler
+
 '''
 room_id = 0
 kind = -1  # 0表示开机请求 1表示送风请求 2表示关机请求
@@ -15,29 +19,55 @@ speed = 1  # 默认中风，用int来表示风速，方便比较  ！！！同�
 '''
 
 
+@method_decorator(csrf_exempt)
+def getPay(req):
+    mp = json.loads(req.body)
+    idx = mp.get("idx")
+    return HttpResponse("pong")
+
+
+@method_decorator(csrf_exempt)
+def getAnalyze(req):
+    mp = json.loads(req.body)
+    idx = mp.get("idx")
+    return HttpResponse("pong")
+
+@method_decorator(csrf_exempt)
 def getStatus(req):
-    print(req.GET)
-    idx = req.GET.idx
+    mp = json.loads(req.body)
+    idx = mp.get("idx")
     ret = AirCondition.getConditon(idx)
-    print(ret)
     return HttpResponse(json.dumps({"code": 0, "msg": ret}))
 
 
+def getAll(req):
+    ret = []
+    for i in range(AirCondition.room_amount):
+        ret.append(AirCondition.airs[i].wrap())
+    return HttpResponse(json.dumps({"code": 0, "msg": ret}))
+
+
+@method_decorator(csrf_exempt)
 def switchMode(req):
-    print(req.GET)
-    reqs = Request(room_id=req.GET.room_id, kind=req.GET.kind, temp=req.GET.temp, speed=req.GET.speed)
+    mp = json.loads(req.body)
+    print(mp)
+    reqs = Request(room_id=mp.get("room_id"), kind=mp.get("kind"), temp=mp.get("temp"), speed=mp.get("speed"))
     ret = AirCondition.echoRequest(reqs)
     return HttpResponse(json.dumps({"code": 0, "msg": ret}))
 
 
+@method_decorator(csrf_exempt)
 def login(req):
-    print(req.GET)
-    res = DataBase.isExist(req.GET.get("name"), req.GET.get("pass"), req.GET.get("mode"))
+    print(req.body)
+    mp = json.loads(req.body)
+    print(mp)
+    res = DataBase.isExist(mp.get("name"), mp.get("pass"), mp.get("mode"))
     return HttpResponse(json.dumps({"code": 0, "msg": str(res)}))
 
 
 def ping(req):
-    print(req.GET)
+    mp = json.loads(req.body)
+    print(mp)
     AirCondition.ping()
     return HttpResponse("pong")
 
@@ -47,4 +77,7 @@ urlpatterns = [
     path('switchMode', switchMode),
     path('ping', ping),
     path('login', login),
+    path('getAll', getAll),
+    path('getPay', getPay),
+    path('getAnalyze', getAnalyze),
 ]

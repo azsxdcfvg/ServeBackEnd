@@ -10,10 +10,13 @@ class Request:
     speed = 1  # 默认中风，用int来表示风速，方便比较  ！！！同样，如果只改变了温度，则风速设为-1
 
     def __init__(self, kind, temp, speed, room_id):
-        self.kind = kind
-        self.temp = temp
-        self.speed = speed
-        self.room_id = room_id
+        self.kind = int(kind)
+        self.temp = int(temp)
+        self.speed = int(speed)
+        self.room_id = int(room_id)
+
+    def __str__(self):
+        return str(self.kind) + " " + str(self.temp) + " " + str(self.speed) + " " + str(self.room_id)
 
 
 class Aircon:
@@ -46,7 +49,9 @@ class Aircon:
 
     # 响应请求
     def echoRequest(self, request):
+        print(str(request))
         if request.kind == 0:  # 开机请求
+            print("开机")
             if request.room_id not in self.queue.running_list2:  # 如果此时空调没有处在开机状态
                 if len(self.queue.running_list) < self.available_amount:  # 如果此时服务对象没有满员
                     end = time.process_time()
@@ -204,7 +209,7 @@ class Aircon:
         if len(self.airs) - 1 < idx:
             return []
         else:
-            return self.airs[idx].getdata()
+            return self.airs[idx].wrap()
 
 
 class myThread3(threading.Thread):

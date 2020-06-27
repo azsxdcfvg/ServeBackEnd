@@ -48,6 +48,9 @@ class Slave:
     def getdata(self) -> list:
         return [self.initemp, self.curtemp, self.aimtemp, self.mode, self.wind, self.state, self.ratio, self.price, self.roomid]
 
+    def wrap(self):
+        return {"initemp": self.initemp, "curtemp": self.curtemp, "aimtemp": self.aimtemp, "mode": "制热" if self.mode == 1 else "制冷",
+                "wind": ["高", "中", "低"][self.wind], "state": ["关机","开机且送风", "开机不送风"][self.state], "ratio": self.ratio, "price": self.price, "roomid": self.roomid}
 
 class myThread2(threading.Thread):
     def __init__(self, slavelist: list):
