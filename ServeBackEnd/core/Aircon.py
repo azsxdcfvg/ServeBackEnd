@@ -110,6 +110,7 @@ class Aircon:
                 return -2  # 已经开机的空调不再响应开机请求
 
         elif request.kind == 1:  # 调风请求
+            print("修改送风")
             if request.room_id not in self.queue.running_list2:  # 如果空调根本还没开机
                 return -2  # 还没开机的空调不能接收调风请求
             elif request.room_id in self.queue.waiting_list2:  # 如果空调还处在等待队列里,修改最新请求
@@ -125,11 +126,10 @@ class Aircon:
             else:  # 空调已经在运行队列里
                 for i in range(len(self.queue.running_list)):
                     if request.room_id == self.queue.running_list[i][0]:
-
                         if request.speed != -1:
-                            self.queue.waiting_list[i][2] = request.speed
+                            self.queue.running_list[i][2] = request.speed
                         if request.temp != -1:
-                            self.queue.waiting_list[i][3] = request.temp
+                            self.queue.running_list[i][3] = request.temp
 
                         p = request.room_id - 301
                         self.datahandle.writeData(self.airs[p].roomid, self.airs[p].starttime, datetime.datetime.now()
@@ -140,6 +140,7 @@ class Aircon:
                         return 0  # 表示成功响应请求
 
         elif request.kind == 2:  # 关机请求
+            print("关")
             if request.room_id not in self.queue.running_list2:
                 return -2  # 表示响应无效，此时空调根本没开机
             else:

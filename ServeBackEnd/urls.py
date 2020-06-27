@@ -32,6 +32,7 @@ def getAnalyze(req):
     idx = mp.get("idx")
     return HttpResponse("pong")
 
+
 @method_decorator(csrf_exempt)
 def getStatus(req):
     mp = json.loads(req.body)
@@ -49,8 +50,8 @@ def getAll(req):
 
 @method_decorator(csrf_exempt)
 def switchMode(req):
+    print(req.body)
     mp = json.loads(req.body)
-    print(mp)
     reqs = Request(room_id=mp.get("room_id"), kind=mp.get("kind"), temp=mp.get("temp"), speed=mp.get("speed"))
     ret = AirCondition.echoRequest(reqs)
     return HttpResponse(json.dumps({"code": 0, "msg": ret}))

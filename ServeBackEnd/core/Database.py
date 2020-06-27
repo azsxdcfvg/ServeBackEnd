@@ -48,11 +48,11 @@ class datadbHandler:
     # 向数据库写数据
     def writeData(self, roomId: int, startTime: str, endTime: str, windSpeed: int
                   , price: float, mode: int, ratio: float, aimteproture: int, isdispatch: int):
-        # print("insert into "+tbName+" values"+"(" + str(roomId) + ',' + startTime + ',' + endTime + ','
-        # + str(windSpeed) + ',' + str(price) + ',' + str(mode) + ',' + str(ratio) + ')')
+        print("insert into " + self.tbname + " values" + "(" + str(roomId) + ',' + str(startTime) + ',' + str(endTime) + ','
+              + str(windSpeed) + ',' + str(price) + ',' + str(mode) + ',' + str(ratio) + ')')
         try:
             self.cursor.execute('insert into ' + self.tbname + ' values' + '(' + str(
-                roomId) + ',"' + startTime + '","' + endTime + '",' + str(windSpeed) + ',' + str(price) + ','
+                roomId) + ',"' + str(startTime) + '","' + str(endTime) + '",' + str(windSpeed) + ',' + str(price) + ','
                                 + str(mode) + ',' + str(ratio) + ',' + str(aimteproture) + ',' + str(isdispatch) + ')')
         except Exception as e:
             print("data写数据失败", e)
