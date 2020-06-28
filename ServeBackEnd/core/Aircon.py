@@ -10,6 +10,7 @@ class Request:
     speed = 1  # 默认中风，用int来表示风速，方便比较  ！！！同样，如果只改变了温度，则风速设为-1
 
     def __init__(self, kind, temp, speed, room_id):
+        print(kind, temp, speed, room_id)
         self.kind = int(kind)
         self.temp = int(temp)
         self.speed = int(speed)
@@ -211,6 +212,14 @@ class Aircon:
             return []
         else:
             return self.airs[idx].wrap()
+
+    def getPay(self, idx, when):
+        ret = self.handle.datadbhandler.getDataForDetail(idx, '"' + when + '"')
+        return ret
+
+    def getAnalyze(self, idx, mode):
+        ret = self.handle.datadbhandler.getDataForTable(idx, mode)
+        return ret
 
 
 class myThread3(threading.Thread):

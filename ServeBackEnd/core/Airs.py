@@ -11,8 +11,7 @@ totaltime = 0.5
 
 
 class Slave:
-    def __init__(self, initemp: float, curtemp: float, aimtemp: float, mode: int, wind: int, state: int, ratio: float
-                 , roomid: int, price: float = 0):
+    def __init__(self, initemp: float, curtemp: float, aimtemp: float, mode: int, wind: int, state: int, ratio: float, roomid: int, price: float = 0):
         self.initemp = initemp
         self.curtemp = curtemp
         self.aimtemp = aimtemp
@@ -27,7 +26,11 @@ class Slave:
 
     def tempchange(self):
         if self.state == 0 or self.state == 2:
-            self.curtemp += self.initemp - self.curtemp
+            # self.curtemp += self.initemp - self.curtemp
+            if self.initemp > self.curtemp:
+                self.curtemp += 0.5 * totaltime
+            else:
+                self.curtemp -= 0.5 * totaltime
         if self.state == 1:
             if math.exp(self.curtemp - self.aimtemp) <= (0.6 / totaltime):
                 self.state = 2
@@ -50,7 +53,8 @@ class Slave:
 
     def wrap(self):
         return {"initemp": self.initemp, "curtemp": self.curtemp, "aimtemp": self.aimtemp, "mode": "制热" if self.mode == 1 else "制冷",
-                "wind": ["高", "中", "低"][self.wind], "state": ["关机","开机且送风", "开机不送风"][self.state], "ratio": self.ratio, "price": self.price, "roomid": self.roomid}
+                "wind": ["高", "中", "低"][self.wind], "state": ["关机", "开机且送风", "开机不送风"][self.state], "ratio": self.ratio, "price": self.price, "roomid": self.roomid}
+
 
 class myThread2(threading.Thread):
     def __init__(self, slavelist: list):

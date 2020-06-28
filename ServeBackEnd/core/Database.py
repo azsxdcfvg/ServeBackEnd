@@ -60,14 +60,15 @@ class datadbHandler:
 
     # 获得详单数据
     def getDataForDetail(self, roomId: int, startTime: str):
-        # print("select * from " + self.tbname + ' where endtime > ' + startTime + ' and ' + "roomid = " + str(roomId))
+        print("select * from " + self.tbname + ' where endtime > ' + str(startTime) + ' and ' + "roomid = " + str(roomId))
         try:
             self.cursor.execute(
-                "select * from " + self.tbname + ' where endtime > ' + startTime + ' and ' + "roomid = " + str(roomId))
+                "select * from " + self.tbname + ' where endtime > ' + str(startTime) + ' and ' + "roomid = " + str(roomId))
             query_result = self.cursor.fetchall()
+            print(query_result)
             return query_result
         except Exception as e:
-            print("详单数据获取出错")
+            print("详单数据获取出错", e)
             raise Exception
 
     # 按需求返回报表数据,默认返回日报表d日,m月,y年
@@ -85,8 +86,7 @@ class datadbHandler:
         elif mode == 'y':
             currenttime = currenttime[0:5] + "01-01 00:00:00"
         # print(currenttime)
-        self.cursor.execute("select * from " + self.tbname + " where endtime > " + '"' + currenttime + '"' + " and "
-                            + "roomid = " + str(roomId))
+        self.cursor.execute("select * from " + self.tbname + " where endtime > " + '"' + str(currenttime) + '"' + " and " + "roomid = " + str(roomId))
         # print("select * from " + self.tbname + " where endtime > " + '"' + currenttime + '"' + " and " + "roomid
         # = " + str(roomId))
         query_result = self.cursor.fetchall()

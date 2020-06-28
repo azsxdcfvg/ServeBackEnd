@@ -11,26 +11,23 @@ from .core.Aircon import Request
 AirCondition = Aircon.Aircon()
 DataBase = AirCondition.handle.logindbhandler
 
-'''
-room_id = 0
-kind = -1  # 0表示开机请求 1表示送风请求 2表示关机请求
-temp = 25  # 默认25度  ！！！设定如果只改了风速，则温度设定为-1
-speed = 1  # 默认中风，用int来表示风速，方便比较  ！！！同样，如果只改变了温度，则风速设为-1
-'''
-
 
 @method_decorator(csrf_exempt)
 def getPay(req):
     mp = json.loads(req.body)
     idx = mp.get("idx")
-    return HttpResponse("pong")
+    when = mp.get("when")
+    ret = AirCondition.getPay(idx, when)
+    return HttpResponse(json.dumps({"code": 0, "msg": ret}))
 
 
 @method_decorator(csrf_exempt)
 def getAnalyze(req):
     mp = json.loads(req.body)
     idx = mp.get("idx")
-    return HttpResponse("pong")
+    mode = mp.get("mode")
+    ret = AirCondition.getAnalyze(idx, mode)
+    return HttpResponse(json.dumps({"code": 0, "msg": ret}))
 
 
 @method_decorator(csrf_exempt)
