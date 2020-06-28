@@ -33,7 +33,7 @@ class Aircon:
         self.queue = Queue(start)  # 初始化队列
         self.airs = []  # 初始化空调列表
         for i in range(self.room_amount):
-            temp = Slave(28, 28, 25, -1, 2, 0, 0, 301 + i)
+            temp = Slave(28, 28, 25, -1, 2, 0, 0.5, 301 + i)
             self.airs.append(temp)
 
         # 开启线程1,负责检测等待队列
@@ -179,6 +179,7 @@ class Aircon:
                     if request.speed != -1:
                         self.airs[i].wind = request.speed
                         self.airs[i].isdispatched = 1
+                        self.airs[i].ratio = 1 / self.airs[i].wind
                     else:
                         self.airs[i].isdispatched = 0
                     if request.temp != -1:
