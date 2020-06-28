@@ -216,12 +216,12 @@ class Aircon:
     # 该函数用于检测空调的状态
     def listenrunning(self):
         for air in self.airs:
-            if air.state == 1 and air.aimtemp == air.curtemp:
-                request = Request(1, air.aimtemp, air.wind - 1, air.roomid)
+            if air.state == 1 and abs(air.aimtemp - air.curtemp) <= 0.001:
+                request = Request(2, air.aimtemp, air.wind, air.roomid)
                 self.echoRequest(request)
 
             elif air.state == 2 and air.curtemp - air.aimtemp > 1:
-                request = Request(1, air.aimtemp, air.wind - 1, air.roomid)
+                request = Request(1, air.aimtemp, air.wind, air.roomid)
                 self.echoRequest(request)
 
     def ping(self):
