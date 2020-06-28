@@ -75,11 +75,11 @@ class datadbHandler:
                 mp["roomid"] = p[0]
                 mp["starttime"] = p[1]
                 mp["endtime"] = p[2]
-                mp["windspeed"] = p[3]
+                mp["windspeed"] = ["低", "中", "高"][p[3] - 1]
                 mp["price"] = p[4]
                 mp["ratio"] = p[6]
-                mp["aimtemproture"] = p[6]
-                mp["isdispatch"] = p[6]
+                mp["aimtemproture"] = p[7]
+                mp["isdispatch"] = p[8]
                 if (p[5] == 1):
                     mp["mode"] = '制热'
                 else:
