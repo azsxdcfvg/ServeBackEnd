@@ -153,8 +153,8 @@ class Aircon:
                             return 1
                         else:
                             self.datahandle.writeData(self.airs[p].roomid, self.airs[p].starttime, datetime.datetime.now()
-                                                  , self.airs[p].wind, self.airs[p].price, self.airs[p].mode
-                                                  , self.airs[p].ratio, self.airs[p].aimtemp, self.airs[p].isdispatched)
+                                                      , self.airs[p].wind, self.airs[p].price, self.airs[p].mode
+                                                      , self.airs[p].ratio, self.airs[p].aimtemp, self.airs[p].isdispatched)
 
                             self.changeairs(request, 1)
                             return 0  # 表示成功响应请求
@@ -237,8 +237,8 @@ class Aircon:
         ret = self.handle.datadbhandler.getDataForDetail(idx, '"' + when + '"')
         return ret
 
-    def getAnalyze(self, idx, mode):
-        ret = self.handle.datadbhandler.getDataForTable(idx, mode)
+    def getAnalyze(self, mode):
+        ret = self.handle.datadbhandler.getDataForTable(mode)
         return ret
 
 

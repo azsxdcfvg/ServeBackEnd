@@ -49,7 +49,7 @@ def getAll(req):
 def switchMode(req):
     print(req.body)
     mp = json.loads(req.body)
-    reqs = Request(room_id=mp.get("room_id"), kind=mp.get("kind"), temp=mp.get("temp"), speed=mp.get("speed"))
+    reqs = Request(room_id=mp.get("room_id"), kind=mp.get("kind"), temp=mp.get("temp"), speed=mp.get("speed"), mode=mp.get("mode"))
     ret = AirCondition.echoRequest(reqs)
     return HttpResponse(json.dumps({"code": 0, "msg": ret}))
 

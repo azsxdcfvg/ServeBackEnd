@@ -34,6 +34,7 @@ class Slave:
                 else:
                     self.curtemp -= 0.5 * totaltime
         if self.state == 1:
+            print(self.__str__())
             if self.wind == 3:
                 bias = 0.6
             elif self.wind == 2:
@@ -43,11 +44,12 @@ class Slave:
             if math.fabs(self.curtemp - self.aimtemp) < bias * totaltime:
                 self.curtemp = self.aimtemp
                 self.state = 2
-            if self.mode == -1 and self.curtemp > self.aimtemp and math.fabs(self.curtemp - self.aimtemp) >= bias * totaltime:
-                self.curtemp = self.curtemp - (0.5 + (self.wind - 1) * 0.1) * totaltime
+            if self.mode == -1 and self.curtemp > self.aimtemp:
+                self.curtemp = self.curtemp - (0.5 + (self.wind - 2) * 0.1) * totaltime
                 self.price += 1 / (4 - self.wind) * totaltime
             if self.mode == 1 and self.curtemp < self.aimtemp:
-                self.curtemp = self.curtemp + (0.5 + (self.wind - 1) * 0.1) * totaltime
+                self.curtemp = self.curtemp + (0.5 + (self.wind - 2) * 0.1) * totaltime
+                print(self.curtemp, (0.5 + (self.wind - 2) * 0.1) * totaltime)
                 self.price += (1 / (4 - self.wind)) * totaltime
 
     def __str__(self):
@@ -62,7 +64,7 @@ class Slave:
 
     def wrap(self):
         return {"initemp": self.initemp, "curtemp": self.curtemp, "aimtemp": self.aimtemp, "mode": "制热" if self.mode == 1 else "制冷",
-                "wind": ["高", "中", "低"][self.wind], "state": ["关机", "开机且送风", "开机不送风"][self.state], "ratio": self.ratio, "price": self.price, "roomid": self.roomid}
+                "wind": ["低", "中", "高"][self.wind - 1], "state": ["关机", "开机且送风", "开机不送风"][self.state], "ratio": self.ratio, "price": self.price, "roomid": self.roomid}
 
 
 class myThread2(threading.Thread):
