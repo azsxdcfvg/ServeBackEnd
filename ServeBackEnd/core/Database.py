@@ -139,10 +139,10 @@ class datadbHandler:
             detailnum = len(perroomdata)  # 详单数
 
             pretem = 25  # 上一次的目标温度,初始为默认温度,或者零也可当作开机就是一次调温
-            prewind = 0  # 上次风速
+            prewind = 2  # 上次风速
             for data in perroomdata:
                 # 获得最后总金额
-                price += data[5]
+                price += data[4]
                 # 获得最后总时长
                 ta = time.strptime(data[2].split('.')[0], "%Y-%m-%d %H:%M:%S")
                 tb = time.strptime(data[1].split('.')[0], "%Y-%m-%d %H:%M:%S")
