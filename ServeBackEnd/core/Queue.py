@@ -2,14 +2,15 @@ import threading
 import time
 
 class Queue:
-    def __init__(self, start):
-        # running_list 列表里放的是列表类型，各元素对应着 房间号 请求开始响应的时间点 风速 温度 
-        # waiting_list 各元素对应着房间号 开始被分配到等待队列的时间点 请求风速 请求温度
+    def __init__(self, start, airs):
+        # running_list 列表里放的是列表类型，各元素对应着 房间号 请求开始响应的时间点 风速 温度 模式
+        # waiting_list 各元素对应着房间号 开始被分配到等待队列的时间点 请求风速 请求温度 模式
         self.running_list = []
         self.running_list2 = []
         self.waiting_list = []
         self.waiting_list2 = []
         self.start = start
+        self.airs = airs
 
     # !!!有三个监视函数要写
     # 1、等待队列里的等待时间超过两分钟就要调到running_list里
@@ -22,24 +23,31 @@ class Queue:
         t1 = end - self.start
         for i in range(len(self.waiting_list)):
             if t1 - self.waiting_list[i][1] >= 120:
-                # 把原来在running_list的踢出去，
-                self.running_list.sort(key=lambda x: x[1])
-                temp_list = self.running_list.pop(0)
-                self.running_list2.remove(temp_list[0])
+                if self.waiting_list[i][4] == -1 and self.airs[self.waiting_list[i][0] - 301].curtemp < self.waiting_list[i][2] or \
+                        self.waiting_list[i][4] == 1 and self.airs[self.waiting_list[i][0] - 301].curtemp > self.waiting_list[i][2]:
+                    # 这种情况下需要继续waiting，重新开始两分钟计时
+                    end = time.process_time()
+                    t = end - self.start
+                    self.waiting_list[i][1] = t
 
-                end = time.process_time()
-                t2 = end - self.start
-                temp_list[1] = t2
-                self.waiting_list.append(temp_list)
-                self.waiting_list2.append(temp_list[0])
+                else:  # 可以把原来在running_list的踢出去
+                    self.running_list.sort(key=lambda x: x[1])
+                    temp_list = self.running_list.pop(0)
+                    self.running_list2.remove(temp_list[0])
 
-                self.waiting_list2.remove(self.waiting_list[i][0])
-                temp_list = self.waiting_list.pop(i)
-                end = time.process_time()
-                t3 = end - self.start
-                temp_list[1] = t3
-                self.running_list.append(temp_list)
-                self.running_list2.append(temp_list[0])
+                    end = time.process_time()
+                    t2 = end - self.start
+                    temp_list[1] = t2
+                    self.waiting_list.append(temp_list)
+                    self.waiting_list2.append(temp_list[0])
+
+                    self.waiting_list2.remove(self.waiting_list[i][0])
+                    temp_list = self.waiting_list.pop(i)
+                    end = time.process_time()
+                    t3 = end - self.start
+                    temp_list[1] = t3
+                    self.running_list.append(temp_list)
+                    self.running_list2.append(temp_list[0])
 
 
 class myThread1(threading.Thread):
