@@ -67,9 +67,26 @@ class datadbHandler:
             self.cursor.execute("select * from " + self.tbname + ' where startTime >= ' + str(startTime) + ' and ' + "roomid = " + str(roomId))
             # self.cursor.execute("select * from " + self.tbname)
             query_result = self.cursor.fetchall()
-            print(query_result)
             self.con.commit()
-            return query_result
+            ret = []
+            for i in query_result:
+                p = list(i)
+                mp = {}
+                mp["roomid"] = p[0]
+                mp["starttime"] = p[1]
+                mp["endtime"] = p[2]
+                mp["windspeed"] = p[3]
+                mp["price"] = p[4]
+                mp["ratio"] = p[6]
+                mp["aimtemproture"] = p[6]
+                mp["isdispatch"] = p[6]
+                if (p[5] == 1):
+                    mp["mode"] = '制热'
+                else:
+                    mp["mode"] = '制冷'
+                ret.append(mp)
+            print(ret)
+            return ret
         except Exception as e:
             print("详单数据获取出错", e)
             raise Exception
@@ -108,8 +125,8 @@ class datadbHandler:
         keys = list(sort.keys())
 
         result = {}
-        for i in range(roomnum):
-            result[roomnum] = [0, 0, 0, 0, 0, 0, 0]  # 开关次数, 使用时长, 总费用, 调度次数, 详单数, 调温次数, 调风次数
+        # for i in range(roomnum):
+        #     result[roomnum] = [0, 0, 0, 0, 0, 0, 0]  # 开关次数, 使用时长, 总费用, 调度次数, 详单数, 调温次数, 调风次数
         for key in keys:
             perroomdata = sort[key]
             minutesDiff = 0  # 存放空调总运行时间,单位分钟
@@ -153,8 +170,9 @@ class datadbHandler:
                 # 获取开关次数,如果无调风,无调温,无调度说明由于开关
                 if data[7] == pretem and data[3] == prewind and data[8] == 0:
                     opentimes += 1
-            result[key] = [opentimes, minutesDiff, price, dispatchnum, detailnum, changetem, changewind]
-
+            result[key] = {"opentimes": opentimes, "minutesDiff": minutesDiff, "price": price,
+                           "dispatchnum": dispatchnum, "detailnum": detailnum, "changetem": changetem, "changewind": changewind}
+        print(result)
         return result
 
 
