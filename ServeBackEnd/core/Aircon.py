@@ -9,15 +9,17 @@ class Request:
     temp = 25  # 默认25度  ！！！设定如果只改了风速，则温度设定为-1
     speed = 2  # 默认中风，用int来表示风速，方便比较  ！！！同样，如果只改变了温度，则风速设为-1
 
-    def __init__(self, kind, temp, speed, room_id):
+    def __init__(self, kind, temp, speed, room_id, mode):
         print(kind, temp, speed, room_id)
         self.kind = int(kind)
         self.temp = int(temp)
         self.speed = int(speed)
         self.room_id = int(room_id)
+        self.mode = mode
 
     def __str__(self):
-        return str(self.kind) + " " + str(self.temp) + " " + str(self.speed) + " " + str(self.room_id)
+        return str(self.kind) + " " + str(self.temp) + " " + str(self.speed) + " " \
+               + str(self.room_id) + " " + str(self.mode)
 
 
 class Aircon:
@@ -29,12 +31,11 @@ class Aircon:
         self.available_amount = 3  # 最多能服务的房间数
         start = time.process_time()
         self.start = start
-
-        self.queue = Queue(start)  # 初始化队列
         self.airs = []  # 初始化空调列表
         for i in range(self.room_amount):
             temp = Slave(28, 28, 25, -1, 2, 0, 0.5, 301 + i)
             self.airs.append(temp)
+        self.queue = Queue(start, self.airs)  # 初始化队列
 
         # 开启线程1,负责检测等待队列
         print("开启线程1: 检测等待队列是否有请求可以被调度")
@@ -57,19 +58,33 @@ class Aircon:
                 if len(self.queue.running_list) < self.available_amount:  # 如果此时服务对象没有满员
                     end = time.process_time()
                     t1 = end - self.start
-                    self.queue.running_list.append([request.room_id, t1, request.speed, request.temp])
-                    self.queue.running_list2.append(request.room_id)
-
-                    # 另加
                     self.airs[len(self.queue.running_list) - 1].starttime = datetime.datetime.now()
-                    self.changeairs(request, 1)
 
-                    # 2开机时不需要写数据库
+                    if request.mode == -1 and self.airs[request.room_id - 301].curtemp < request.temp or \
+                            request.mode == 1 and self.airs[request.room_id - 301].curtemp > request.temp:  # 如果模式不正确
+                        self.queue.waiting_list.append([request.room_id, t1, request.speed, request.temp, request.mode])
+                        self.queue.waiting_list2.append(request.room_id)
+                        self.changeairs(request, 0)
+                        return 1
+                    else:
+                        self.queue.running_list.append([request.room_id, t1, request.speed, request.temp, request.mode])
+                        self.queue.running_list2.append(request.room_id)
+                        self.changeairs(request, 1)
+                        return 0
 
-                    return 0  # 表示成功响应请求
                 else:
+                    #  如果模式不匹配，直接进入等待队列
+                    if request.mode == -1 and self.airs[request.room_id - 301].curtemp < request.temp or \
+                            request.mode == 1 and self.airs[request.room_id - 301].curtemp > request.temp:
+                        end = time.process_time()
+                        t = end - self.start
+                        self.queue.waiting_list.append([request.room_id, t, request.speed, request.temp, request.mode])
+                        self.queue.waiting_list2.append(request.room_id)
+                        self.changeairs(request, 0)
+                        return 1  # 表示该请求正在等待中
+
                     for i in range(len(self.queue.running_list)):  # 查看该请求是否可以调换出running_list里的请求
-                        if self.queue.running_list[i][2] < request.speed:
+                        if self.queue.running_list[i][2] < request.speed:  # 找到了优先级较低的请求
                             # 移除优先级较低的请求到等待队列
                             temp_list = self.queue.running_list.pop(i)
                             end = time.process_time()
@@ -92,18 +107,16 @@ class Aircon:
                             # 把新请求加入到running_list
                             end = time.process_time()
                             t3 = end - self.start
-                            self.queue.running_list.append([request.room_id, t3, request.speed, request.temp])
+                            self.queue.running_list.append([request.room_id, t3, request.speed, request.temp, request.mode])
                             self.queue.running_list2.append(request.room_id)
                             self.changeairs(request, 1)
 
-                            # !!!还要加上对数据库的操作 修改房间信息
-                            # 一个请求完成的时候才需要写数据库
                             return 0  # 表示成功响应请求
 
                     # 如果前面函数没有返回，说明该请求比不上running_list里任何请求的优先级，直接进入waiting_list
                     end = time.process_time()
                     t4 = end - self.start
-                    self.queue.waiting_list.append([request.room_id, t4, request.speed, request.temp])
+                    self.queue.waiting_list.append([request.room_id, t4, request.speed, request.temp, request.mode])
                     self.queue.waiting_list2.append(request.room_id)
                     self.changeairs(request, 0)
                     return 1  # 表示该请求正在等待中，两分钟之后开始实施
@@ -121,9 +134,10 @@ class Aircon:
                             self.queue.waiting_list[i][2] = request.speed
                         if request.temp != -1:
                             self.queue.waiting_list[i][3] = request.temp
-                        # !!!不用加数据库的操作，没被正式调度都不用改
+                        self.queue.waiting_list[i][4] = request.mode
                         self.changeairs(request, 0)
                         return 1  # 表示该请求正在等待中，据第一次提出请求两分钟后开始实施
+
             else:  # 空调已经在运行队列里
                 for i in range(len(self.queue.running_list)):
                     if request.room_id == self.queue.running_list[i][0]:
@@ -133,12 +147,17 @@ class Aircon:
                             self.queue.running_list[i][3] = request.temp
 
                         p = request.room_id - 301
-                        self.datahandle.writeData(self.airs[p].roomid, self.airs[p].starttime, datetime.datetime.now()
+                        if request.mode == -1 and self.airs[request.room_id - 301].curtemp < request.temp or \
+                                request.mode == 1 and self.airs[request.room_id - 301].curtemp > request.temp:
+                            self.changeairs(request, 0)
+                            return 1
+                        else:
+                            self.datahandle.writeData(self.airs[p].roomid, self.airs[p].starttime, datetime.datetime.now()
                                                   , self.airs[p].wind, self.airs[p].price, self.airs[p].mode
                                                   , self.airs[p].ratio, self.airs[p].aimtemp, self.airs[p].isdispatched)
 
-                        self.changeairs(request, 1)
-                        return 0  # 表示成功响应请求
+                            self.changeairs(request, 1)
+                            return 0  # 表示成功响应请求
 
         elif request.kind == 2:  # 关机请求
             print("关")
@@ -218,8 +237,8 @@ class Aircon:
         ret = self.handle.datadbhandler.getDataForDetail(idx, '"' + when + '"')
         return ret
 
-    def getAnalyze(self, mode):
-        ret = self.handle.datadbhandler.getDataForTable(mode)
+    def getAnalyze(self, idx, mode):
+        ret = self.handle.datadbhandler.getDataForTable(idx, mode)
         return ret
 
 
