@@ -209,10 +209,10 @@ class Aircon:
         print("pong")
 
     def getConditon(self, idx):
-        if len(self.airs) - 1 < idx:
+        if 305 <= idx or idx < 300:
             return []
         else:
-            return self.airs[idx].wrap()
+            return self.airs[idx - 300].wrap()
 
     def getPay(self, idx, when):
         ret = self.handle.datadbhandler.getDataForDetail(idx, '"' + when + '"')

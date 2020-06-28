@@ -32,8 +32,9 @@ def getAnalyze(req):
 @method_decorator(csrf_exempt)
 def getStatus(req):
     mp = json.loads(req.body)
-    idx = mp.get("idx")
+    idx = int(mp.get("idx"))
     ret = AirCondition.getConditon(idx)
+    print(idx, ret)
     return HttpResponse(json.dumps({"code": 0, "msg": ret}))
 
 
