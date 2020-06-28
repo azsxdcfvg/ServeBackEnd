@@ -3,7 +3,7 @@ import time
 
 class Queue:
     def __init__(self, start):
-        # running_list 列表里放的是列表类型，各元素对应着 房间号 请求开始响应的时间点 风速 温度
+        # running_list 列表里放的是列表类型，各元素对应着 房间号 请求开始响应的时间点 风速 温度 
         # waiting_list 各元素对应着房间号 开始被分配到等待队列的时间点 请求风速 请求温度
         self.running_list = []
         self.running_list2 = []
