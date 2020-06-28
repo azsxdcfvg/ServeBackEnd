@@ -27,14 +27,23 @@ class Slave:
     def tempchange(self):
         if self.state == 0 or self.state == 2:
             # self.curtemp += self.initemp - self.curtemp
-            if self.initemp > self.curtemp:
-                self.curtemp += 0.5 * totaltime
-            else:
-                self.curtemp -= 0.5 * totaltime
+            if math.fabs(self.curtemp - self.initemp) >= (0.5 * totaltime):
+                print(114514)
+                if self.initemp > self.curtemp:
+                    self.curtemp += 0.5 * totaltime
+                else:
+                    self.curtemp -= 0.5 * totaltime
         if self.state == 1:
-            if math.exp(self.curtemp - self.aimtemp) <= (0.6 / totaltime):
+            if self.wind == 3:
+                bias = 0.6
+            elif self.wind == 2:
+                bias = 0.5
+            else:
+                bias = 0.4
+            if math.fabs(self.curtemp - self.aimtemp) < bias * totaltime:
+                self.curtemp = self.aimtemp
                 self.state = 2
-            if self.mode == -1 and self.curtemp > self.aimtemp and math.exp(self.curtemp - self.aimtemp) > (0.6 / totaltime):
+            if self.mode == -1 and self.curtemp > self.aimtemp and math.fabs(self.curtemp - self.aimtemp) >= bias * totaltime:
                 self.curtemp = self.curtemp - (0.5 + (self.wind - 1) * 0.1) * totaltime
                 self.price += 1 / (4 - self.wind) * totaltime
             if self.mode == 1 and self.curtemp < self.aimtemp:

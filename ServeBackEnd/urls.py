@@ -24,9 +24,8 @@ def getPay(req):
 @method_decorator(csrf_exempt)
 def getAnalyze(req):
     mp = json.loads(req.body)
-    idx = mp.get("idx")
     mode = mp.get("mode")
-    ret = AirCondition.getAnalyze(idx, mode)
+    ret = AirCondition.getAnalyze(mode)
     return HttpResponse(json.dumps({"code": 0, "msg": ret}))
 
 

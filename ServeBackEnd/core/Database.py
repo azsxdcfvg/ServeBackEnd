@@ -35,15 +35,16 @@ class dbHandler:
         except Exception as e:
             pass
         self.con.commit()
-        self.datadbhandler = datadbHandler(self.cursor)
-        self.logindbhandler = logindbHandler(self.cursor)
+        self.datadbhandler = datadbHandler(self.cursor, self.con)
+        self.logindbhandler = logindbHandler(self.cursor, self.con)
         # self.sessionid = ""
 
 
 class datadbHandler:
-    def __init__(self, cursor):
+    def __init__(self, cursor, con):
         self.tbname = dataTableName
         self.cursor = cursor
+        self.con = con
 
     # 向数据库写数据
     def writeData(self, roomId: int, startTime: str, endTime: str, windSpeed: int
@@ -54,25 +55,27 @@ class datadbHandler:
             self.cursor.execute('insert into ' + self.tbname + ' values' + '(' + str(
                 roomId) + ',"' + str(startTime) + '","' + str(endTime) + '",' + str(windSpeed) + ',' + str(price) + ','
                                 + str(mode) + ',' + str(ratio) + ',' + str(aimteproture) + ',' + str(isdispatch) + ')')
+            self.con.commit()
         except Exception as e:
             print("data写数据失败", e)
             raise Exception
 
     # 获得详单数据
     def getDataForDetail(self, roomId: int, startTime: str):
-        print("select * from " + self.tbname + ' where endtime > ' + str(startTime) + ' and ' + "roomid = " + str(roomId))
+        print("select * from " + self.tbname + ' where startTime > ' + str(startTime) + ' and ' + "roomid = " + str(roomId))
         try:
-            self.cursor.execute(
-                "select * from " + self.tbname + ' where endtime > ' + str(startTime) + ' and ' + "roomid = " + str(roomId))
+            self.cursor.execute("select * from " + self.tbname + ' where startTime >= ' + str(startTime) + ' and ' + "roomid = " + str(roomId))
+            # self.cursor.execute("select * from " + self.tbname)
             query_result = self.cursor.fetchall()
             print(query_result)
+            self.con.commit()
             return query_result
         except Exception as e:
             print("详单数据获取出错", e)
             raise Exception
 
     # 按需求返回报表数据,默认返回日报表d日,m月,y年
-    def getDataForTable(self, roomId: int, mode: str = 'd') -> dict:
+    def getDataForTable(self, mode: str = 'd') -> dict:
         # 按照参数提取年/月/日报表
 
         currenttime = datetime.datetime.now()
@@ -85,14 +88,13 @@ class datadbHandler:
             currenttime = currenttime[0:8] + "01 00:00:00"
         elif mode == 'y':
             currenttime = currenttime[0:5] + "01-01 00:00:00"
-        # print(currenttime)
-        self.cursor.execute("select * from " + self.tbname + " where endtime > " + '"' + str(currenttime) + '"' + " and " + "roomid = " + str(roomId))
-        # print("select * from " + self.tbname + " where endtime > " + '"' + currenttime + '"' + " and " + "roomid
-        # = " + str(roomId))
+        print("select * from " + self.tbname + " where startTime > " + '"' + str(currenttime) + '"')
+        self.cursor.execute("select * from " + self.tbname + " where startTime > " + '"' + str(currenttime) + '"')
         query_result = self.cursor.fetchall()
+        self.con.commit()
 
         # 查询结果
-        # print(query_result)
+        print(query_result)
         return self.gettabledata(query_result)
 
     def gettabledata(self, query_result: list):
@@ -125,8 +127,8 @@ class datadbHandler:
                 # 获得最后总金额
                 price += data[5]
                 # 获得最后总时长
-                ta = time.strptime(data[2], "%Y-%m-%d %H:%M:%S")
-                tb = time.strptime(data[1], "%Y-%m-%d %H:%M:%S")
+                ta = time.strptime(data[2].split('.')[0], "%Y-%m-%d %H:%M:%S")
+                tb = time.strptime(data[1].split('.')[0], "%Y-%m-%d %H:%M:%S")
                 y, m, d, H, M, S = ta[0:6]
                 dataTimea = datetime.datetime(y, m, d, H, M, S)
                 y, m, d, H, M, S = tb[0:6]
@@ -157,9 +159,10 @@ class datadbHandler:
 
 
 class logindbHandler:
-    def __init__(self, cursor):
+    def __init__(self, cursor, con):
         self.tbname = loginTableName
         self.cursor = cursor
+        self.con = con
         if self.isExist("admin", "admin", 1) == -1:
             print("write admin")
             self.writeData("admin", "admin", 1)
@@ -184,6 +187,7 @@ class logindbHandler:
         password = self.hashencode(password)
         try:
             self.cursor.execute('insert into ' + self.tbname + ' values' + '("' + username + '","' + password + '", ' + str(mode) + ')')
+            self.con.commit()
 
         except Exception as e:
             print("注册部分写数据失败", e)
@@ -196,6 +200,7 @@ class logindbHandler:
         try:
             self.cursor.execute("select * from " + self.tbname + " where username = " + '"' + username + '" and password = ' + '"' + password + '"' + ' and mode = ' + str(mode))
             query_result = self.cursor.fetchall()
+            self.con.commit()
 
             # 有相应的用户数据,返回sessionid
             if len(query_result) != 0:

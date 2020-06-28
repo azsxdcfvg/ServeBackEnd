@@ -217,8 +217,8 @@ class Aircon:
         ret = self.handle.datadbhandler.getDataForDetail(idx, '"' + when + '"')
         return ret
 
-    def getAnalyze(self, idx, mode):
-        ret = self.handle.datadbhandler.getDataForTable(idx, mode)
+    def getAnalyze(self, mode):
+        ret = self.handle.datadbhandler.getDataForTable(mode)
         return ret
 
 
