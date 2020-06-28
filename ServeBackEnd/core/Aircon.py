@@ -212,6 +212,7 @@ class Aircon:
 
                 else:
                     print("请求类型出错")
+                self.airs[i].price = 0
 
     # 该函数用于检测空调的状态
     def listenrunning(self):
