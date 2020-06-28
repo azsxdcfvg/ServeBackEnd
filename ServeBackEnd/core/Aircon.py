@@ -217,7 +217,7 @@ class Aircon:
     def listenrunning(self):
         for air in self.airs:
             if air.state == 1 and abs(air.aimtemp - air.curtemp) <= 0.001:
-                request = Request(0, air.aimtemp, air.wind, air.roomid)
+                request = Request(2, air.aimtemp, air.wind, air.roomid)
                 self.echoRequest(request)
 
             elif air.state == 2 and air.curtemp - air.aimtemp > 1:
