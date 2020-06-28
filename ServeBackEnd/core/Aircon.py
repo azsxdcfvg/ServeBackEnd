@@ -7,7 +7,7 @@ class Request:
     room_id = 0
     kind = -1  # 0表示开机请求 1表示送风请求 2表示关机请求
     temp = 25  # 默认25度  ！！！设定如果只改了风速，则温度设定为-1
-    speed = 1  # 默认中风，用int来表示风速，方便比较  ！！！同样，如果只改变了温度，则风速设为-1
+    speed = 2  # 默认中风，用int来表示风速，方便比较  ！！！同样，如果只改变了温度，则风速设为-1
 
     def __init__(self, kind, temp, speed, room_id):
         self.kind = int(kind)
@@ -32,7 +32,7 @@ class Aircon:
         self.queue = Queue(start)  # 初始化队列
         self.airs = []  # 初始化空调列表
         for i in range(self.room_amount):
-            temp = Slave(28, 28, 25, -1, 1, 0, 0, 301 + i)
+            temp = Slave(28, 28, 25, -1, 2, 0, 0, 301 + i)
             self.airs.append(temp)
 
         # 开启线程1,负责检测等待队列
